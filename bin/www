@@ -92,11 +92,19 @@ function onListening() {
 var io = require('socket.io')(server);
 var os = require('os');
 
+// サーバー側では10ミリ秒ごとに count が10ずつ増えていって100ミリ秒ごとに server-count' が送信される
+// クライアント側(/app/entry.js:23:0)では 'server-count' を受け取って表示する
+let count = 0;
+setInterval(() => {
+  count += 10;
+  console.log('count up');
+}, 10);
+
 function emitServerStatus(socket) {
-  socket.emit('server-status', { loadavg: os.loadavg() });
-  console.log('server-status event emitted.');
+  socket.emit('server-count', { count });
+  console.log('server-count event emitted.');
 }
 
 io.on('connection', function (socket) {
-  setInterval(emitServerStatus, 10, socket);
+  setInterval(emitServerStatus, 100, socket);
 });
